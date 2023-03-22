@@ -1,0 +1,69 @@
+---
+title: "excercise2"
+author: "tino"
+date: "2023-03-22"
+output: html_document
+---
+
+## Libraries
+
+```{r}
+#call library
+library(igraph)
+library(RColorBrewer)
+library(visNetwork)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+setwd("C:/Users/tinot/uu/human_network_lab_2")
+#datainput
+highschool_edge<-read.csv("Highschool_network_edge.csv",header=FALSE)
+highschool_att<-read.csv("Highschool_network_att.csv",header = TRUE)
+facebook_edge<-read.csv("Facebook_network_edge.csv",header=FALSE)
+facebook_att<-read.csv("Facebook_network_att.csv",header = TRUE)
+n=40
+ER1 <- sample_gnp(n, 0.05, directed = FALSE, loops = FALSE)
+ER2 <- sample_gnp(n, 0.1, directed = FALSE, loops = FALSE)
+ER3 <- sample_gnp(n, 0.2, directed = FALSE, loops = FALSE)
+ER1000 <- sample_gnp(1000, 0.2, directed = FALSE, loops= FALSE)
+```
+
+## Question 6
+
+```{r}
+#use only the largest component for analysis
+plot(ER1)
+plot(ER2)
+plot(ER3)
+#plot(ER1000)
+transitivity(ER1000)
+```
+
+## Question 7
+
+Run the following code and discuss with your group mate how the rewiring probability changes
+the network structure:
+
+```{r}
+Regular<-watts.strogatz.game(dim=1,size=300,nei=6, p=0)
+plot(Regular, layout=layout.circle, vertex.label=NA, vertex.size=5, 
+main= "Network with zero rewiring probability ")
+
+SW1<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.001)
+plot(SW1, layout=layout.circle, vertex.label=NA, vertex.size=5, 
+main= "Network with 0.001rewiring probability ")
+
+SW2<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.01)
+plot(SW2, layout=layout.circle, vertex.label=NA, vertex.size=5, 
+main= "Network with 0.01 rewiring probability ")
+
+SW3<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.1)
+plot(SW3, layout=layout.circle, vertex.label=NA, vertex.size=5, 
+main= "Network with 0.1 rewiring probability ")
+transitivity(SW1)
+average.path.length(SW1)
+transitivity(SW2)
+average.path.length(SW2)
+transitivity(SW3)
+average.path.length(SW3)
+```

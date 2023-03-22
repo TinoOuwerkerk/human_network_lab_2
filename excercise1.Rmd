@@ -23,7 +23,7 @@ facebook_att<-read.csv("Facebook_network_att.csv",header = TRUE)
 
 ## Networks
 
-```{r networks}
+```{r}
 #build high school network
 highschool_nodes<-data.frame(name=as.character(highschool_att$NodeID),
  gender=as.character(highschool_att$Gender),
@@ -202,10 +202,25 @@ genderCommunity<-replace(genderCommunity,genderCommunity=="female",1)
 genderCommunity<-replace(genderCommunity,genderCommunity=="male",2)
 genderCommunity<-replace(genderCommunity,genderCommunity=="unknown",3)
 genderCommunity<-as.numeric(genderCommunity)
+
+hallCommunity<-V(Highschool)$hall
+hallCommunity<-replace(hallCommunity,hallCommunity=="1501",1)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1502",2)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1503",3)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1504",4)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1505",5)
+hallCommunity<-as.numeric(hallCommunity)
+
+#clustering
 gender.clustering <- make_clusters(Highschool, membership=genderCommunity)
-modularity(gender.clustering)
+hall.clustering <- make_clusters(Highschool, membership=hallCommunity)
+
+#modularity
+paste0('gender modularity ', modularity(gender.clustering))
+paste0('hall modularity ', modularity(hall.clustering))
+
 ### Louvain algorithm ###
-Louv<-cluster_louvain(graph.object)
+Louv<-cluster_louvain(Highschool)
 modularity(Louv)
 
 ```
