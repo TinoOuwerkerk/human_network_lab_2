@@ -234,15 +234,17 @@ shortest_count %>%
 #Codes to visualize the network and calculate subgraph density:
 ## visualize the network by gender###
 library(RColorBrewer)
+
 coul <- brewer.pal(length(unique( V(Highschool)$gender)), "Set2")
 my_color <- coul[as.numeric(as.factor(V(Highschool)$gender))]
+
 set.seed(10)
 plot(Highschool, vertex.color = my_color,
  vertex.size=5,
  layout=layout.fruchterman.reingold(Highschool),vertex.label=NA,
  main="Highschool network by gender")
-legend("bottomleft", legend=levels(as.factor(V(Highschool)$gender)) ,col = coul , bty =
-"n", pch=20 , pt.cex = 1.5, cex = 1.5, horiz = FALSE, inset = c(0.1, 0.1))
+ legend("bottomleft", legend=levels(as.factor(V(Highschool)$gender)) ,col = coul,
+ bty = "n", pch=20 , pt.cex = 1.5, cex = 1.5, horiz = FALSE, inset = c(0.1, 0.1))
 
 #introduce subgraph by gender, calculate their edge densities
 group_gender <- as.factor(unique(V(Highschool)$gender))
@@ -250,6 +252,7 @@ sapply(levels(group_gender), function(x) {
  y <- induced_subgraph(Highschool, which(V(Highschool)$gender==x))
  cat(paste0("Density for ", x, " friends is ", edge_density(y), '\n'))
 })
+
 
 #introduce subgraph by gender, calculate their edge densities
 group_hall <- as.factor(unique(V(Highschool)$hall))
