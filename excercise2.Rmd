@@ -41,8 +41,7 @@ transitivity(ER1000)
 
 ## Question 7
 
-Run the following code and discuss with your group mate how the rewiring probability changes
-the network structure:
+Run the following code and discuss with your group mate how the rewiring probability changes the network structure:
 
 ```{r}
 Regular<-watts.strogatz.game(dim=1,size=300,nei=6, p=0)
@@ -60,10 +59,45 @@ main= "Network with 0.01 rewiring probability ")
 SW3<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.1)
 plot(SW3, layout=layout.circle, vertex.label=NA, vertex.size=5, 
 main= "Network with 0.1 rewiring probability ")
+
+transitivity(Regular)
+average.path.length(Regular)
+
 transitivity(SW1)
 average.path.length(SW1)
 transitivity(SW2)
 average.path.length(SW2)
 transitivity(SW3)
 average.path.length(SW3)
+```
+
+## Question 8
+
+```{r}
+shortest_paths <- distances(Regular, v = V(Regular), to = V(Regular))
+L0 <- mean(shortest_paths[shortest_paths != Inf])
+C0 <- transitivity(Regular)
+vecC <- character()
+vecL <- character()
+vecP <- c(0, 0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0,1, 0.5, 1)
+for (val in vecP) {
+network<-watts.strogatz.game(dim=1,size=300,nei=6, p=val)
+shortest_paths <- distances(network, v = V(network), to = V(network))
+L <- (mean(shortest_paths[shortest_paths != Inf]))/L0
+C <- transitivity(network)/C0
+vecL <- append(vecL, L)
+vecC <- append(vecC, C)
+}
+
+vecL <- as.double(vecL)
+vecC <- as.double(vecC)
+
+data <- data.frame(vecL, vecC, vecP)
+# Plot the data
+ggplot(data) + 
+  geom_point(aes(vecP, vecL)) + 
+  geom_point(aes(vecP, vecC), colour='black', shape=0) +
+  scale_x_log10() +
+  labs(x = 'p', y = 'C and L')
+
 ```
