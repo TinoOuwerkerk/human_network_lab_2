@@ -189,8 +189,14 @@ dd_facebook<- degree_distribution(Facebook)
 degree_distribution <- data.frame(degree = seq(1:length(dd_facebook)), 
                                   frequency = dd_facebook)
 
+
+FB_count <- as.data.frame(table(fb_distance)) 
+FB_count$fraction <-  FB_count$Freq /sum(FB_count$Freq) # sum by the number of shortest paths
+```
+
+```{r}
 probs = c(0.5, 0.9)
-quantiles <- quantile(degree_FB, prob=probs)
+quantiles <- quantile(degree_FB, prob=probs) 
 
 # Plot degree distribution using ggplot2
 ggplot(degree_distribution, aes(x = degree, y = frequency)) +
@@ -202,27 +208,22 @@ ggplot(degree_distribution, aes(x = degree, y = frequency)) +
   scale_y_continuous(labels = scales::percent)+
   geom_label(aes(x = quantiles[1], y = 0.025, label ="q: 0.5")) +
   geom_label(aes(x = quantiles[2], y = 0.025, label = "q: 0.9 ")) +
-  labs(title = "Degree distribution")+
+  labs(title = "Degree distribution for Facebook")+
   theme_minimal()
-```
 
-```{r}
-shortest_count <- as.data.frame(table(fb_distance)) 
-shortest_count$fraction <-  shortest_count$Freq /sum(shortest_count$Freq) # sum by the number of shortest paths
+quantiles <- quantile(fb_distance, prob=probs) + 2
 
-quantiles <- quantile(fb_distance, prob=probs)
-
-shortest_count %>%
+FB_count %>%
   ggplot(aes(x = fb_distance, y = fraction))+
   geom_bar(stat = "identity") +
-  geom_vline(xintercept = quantiles[1], colour="red", linetype="dotdash") +
-  geom_vline(xintercept = quantiles[2], colour="red", linetype="dotdash" ) +
-  geom_label(aes(x = quantiles[1], y = 0.025, label ="q: 0.5")) +
-  geom_label(aes(x = quantiles[2], y = 0.025, label = "q: 0.9 ")) +
+  geom_vline(xintercept = quantiles[1] , colour="red", linetype="dotdash") +
+  geom_vline(xintercept = quantiles[2] , colour="red", linetype="dotdash" ) +
+  geom_label(aes(x = quantiles[1]   , y = 0.025, label ="q: 0.5")) +
+  geom_label(aes(x = quantiles[2] , y = 0.025, label = "q: 0.9 ")) +
   scale_y_continuous(labels = scales::percent)+
   xlab("Shortest path length") +
   ylab("% of total count by group")+ 
-  labs(title = "Shortest path distribution")+
+  labs(title = "Shortest path distribution for Facebook")+
   theme_minimal()
 ```
 
@@ -233,6 +234,12 @@ dd_highschool<- degree_distribution(Highschool)
 degree_distribution <- data.frame(degree = seq(1:length(dd_highschool)), 
                                   frequency = dd_highschool) 
 
+HS_count <- as.data.frame(table(h_distance)) 
+HS_count$fraction <-  HS_count$Freq /sum(HS_count$Freq) # sum by the number of shortest paths
+```
+
+```{r}
+
 probs = c(0.5, 0.9)
 quantiles <- quantile(degree_HS, prob=probs)
 
@@ -241,32 +248,27 @@ ggplot(degree_distribution, aes(x = degree, y = frequency)) +
   geom_bar(stat = "identity") +
   xlab("Degree") +
   ylab("% of total count")+
-  geom_vline(xintercept = quantiles[1], colour="red", linetype="dotdash") +
-  geom_vline(xintercept = quantiles[2], colour="red", linetype="dotdash" ) +
+  geom_vline(xintercept = quantiles[1], colour="red", linetype="dotdash")+
+  geom_vline(xintercept = quantiles[2], colour="red", linetype="dotdash" )+
   scale_y_continuous(labels = scales::percent)+
-  geom_label(aes(x = quantiles[1], y = 0.025, label ="q: 0.5")) +
-  geom_label(aes(x = quantiles[2], y = 0.025, label = "q: 0.9 ")) +
-  labs(title = "Degree distribution")+
+  geom_label(aes(x = quantiles[1], y = 0.025, label ="q: 0.5"))+
+  geom_label(aes(x = quantiles[2], y = 0.025, label = "q: 0.9 "))+
+  labs(title = "Degree distribution for High school")+
   theme_minimal()
-```
 
-```{r}
-shortest_count <- as.data.frame(table(h_distance)) 
-shortest_count$fraction <-  shortest_count$Freq /sum(shortest_count$Freq) # sum by the number of shortest paths
+quantiles = quantile(h_distance, prob=probs) +2
 
-quantiles <- quantile(h_distance, prob=probs)
-
-shortest_count %>%
+HS_count %>%
   ggplot(aes(x = h_distance, y = fraction))+
   geom_bar(stat = "identity") +
-  geom_vline(xintercept = quantiles[1], colour="red", linetype="dotdash") +
-  geom_vline(xintercept = quantiles[2], colour="red", linetype="dotdash" ) +
-  geom_label(aes(x = quantiles[1], y = 0.025, label ="q: 0.5")) +
-  geom_label(aes(x = quantiles[2], y = 0.025, label = "q: 0.9 ")) +
+  geom_vline(xintercept = quantiles[1] , colour="red", linetype="dotdash")+
+  geom_vline(xintercept = quantiles[2] , colour="red", linetype="dotdash" )+
+  geom_label(aes(x = quantiles[1], y = 0.025, label ="q: 0.5"))+
+  geom_label(aes(x = quantiles[2] , y = 0.025, label = "q: 0.9 "))+
   scale_y_continuous(labels = scales::percent)+
-  xlab("Shortest path length") +
+  xlab("Shortest path length")+
   ylab("% of total count by group")+ 
-  labs(title = "Shortest path distribution")+
+  labs(title = "Shortest path distribution for High school")+
   theme_minimal()
 
 ```

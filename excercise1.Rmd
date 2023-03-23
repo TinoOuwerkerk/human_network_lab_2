@@ -224,7 +224,7 @@ shortest_count %>%
   scale_y_continuous(labels = scales::percent)+
   xlab("Shortest path length") +
   ylab("% of total count by group")+ 
-  labs(title = "Shortest path distribution")+
+  labs(title = "Shortest path distribution high school")+
   theme_minimal()
 
 ```
