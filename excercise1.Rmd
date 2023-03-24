@@ -138,7 +138,9 @@ fb_distance =
  weights = NULL) 
 #Shortest path lengths between every pair of two nodes in the Facebook network
 ```
+
 ### plots for Facebooks
+
 ```{r}
 dd_facebook<- degree_distribution(Facebook)
 
@@ -162,6 +164,7 @@ ggplot(degree_distribution, aes(x = degree, y = frequency)) +
   labs(title = "Degree distribution")+
   theme_minimal()
 ```
+
 ```{r}
 shortest_count <- as.data.frame(table(fb_distance)) 
 shortest_count$fraction <-  shortest_count$Freq /sum(shortest_count$Freq) # sum by the number of shortest paths
@@ -181,6 +184,7 @@ shortest_count %>%
   labs(title = "Shortest path distribution")+
   theme_minimal()
 ```
+
 ### plots for highschool distributions
 
 ```{r}
@@ -228,6 +232,7 @@ shortest_count %>%
   theme_minimal()
 
 ```
+
 ## Question 4
 
 ```{r}
