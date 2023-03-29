@@ -1,12 +1,7 @@
 ---
-title: "excercise2"
-author: "tino"
-date: "2023-03-22"
-output: html_document
+title: "R Notebook"
+output: html_notebook
 ---
-
-## Libraries
-
 ```{r}
 #call library
 library(igraph)
@@ -46,19 +41,19 @@ Run the following code and discuss with your group mate how the rewiring probabi
 ```{r}
 Regular<-watts.strogatz.game(dim=1,size=300,nei=6, p=0)
 plot(Regular, layout=layout.circle, vertex.label=NA, vertex.size=5, 
-main= "Network with zero rewiring probability ")
+main = "Network with zero rewiring probability ")
 
-SW1<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.001)
+SW1 <- watts.strogatz.game(dim=1,size=300,nei=6, p=0.001)
 plot(SW1, layout=layout.circle, vertex.label=NA, vertex.size=5, 
-main= "Network with 0.001rewiring probability ")
+main= "Network with 0.001 rewiring probability ")
 
-SW2<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.01)
+SW2 <-watts.strogatz.game(dim=1,size=300,nei=6, p=0.01)
 plot(SW2, layout=layout.circle, vertex.label=NA, vertex.size=5, 
-main= "Network with 0.01 rewiring probability ")
+main = "Network with 0.01 rewiring probability ")
 
-SW3<-watts.strogatz.game(dim=1,size=300,nei=6, p=0.1)
+SW3 <- watts.strogatz.game(dim=1,size=300,nei=6, p=0.1)
 plot(SW3, layout=layout.circle, vertex.label=NA, vertex.size=5, 
-main= "Network with 0.1 rewiring probability ")
+main = "Network with 0.1 rewiring probability ")
 
 transitivity(Regular)
 average.path.length(Regular)
@@ -102,6 +97,12 @@ ggplot(data) +
   geom_rect(mapping=aes(xmin=0.0004, xmax=0.012, ymin=0.3, ymax=1.02), color="red", alpha=0.00001) +
   theme_minimal()
 
+
 ```
 
 
+```{r}
+g0 <- barabasi.game(100, power = 1.0, m = NULL, out.dist = NULL, out.seq = NULL, out.pref = FALSE, zero.appeal = 1, directed = FALSE,algorithm ="psumtree", start.graph = NULL)
+plot(g0, vertex.label= NA, edge.arrow.size=0.02, vertex.size = degree,layout = layout_nicely(g0), main = "Scale-free network model, power=1.5")
+
+```

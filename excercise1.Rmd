@@ -284,9 +284,9 @@ Highschool_interactive_layout
 #Codes to customize community and calculate modularity:
 ### customize community by gender ###
 genderCommunity<-V(Highschool)$gender
-genderCommunity<-replace(genderCommunity,genderCommunity=="female",1)
-genderCommunity<-replace(genderCommunity,genderCommunity=="male",2)
-genderCommunity<-replace(genderCommunity,genderCommunity=="unknown",3)
+genderCommunity<-replace(genderCommunity, genderCommunity=="female",1)
+genderCommunity<-replace(genderCommunity, genderCommunity=="male",2)
+genderCommunity<-replace(genderCommunity, genderCommunity=="unknown",3)
 genderCommunity<-as.numeric(genderCommunity)
 
 hallCommunity<-V(Highschool)$hall

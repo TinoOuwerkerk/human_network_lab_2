@@ -20,6 +20,7 @@ library(tidygraph)
 library("ggplot2")
 library("GGally")
 library(ergm)
+
 ```
 
 # Exercise one: Analyzing
@@ -342,9 +343,82 @@ Highschool_interactive_layout
 ```
 
 ```{r}
-model <- ergm(Highschool ~ egdes)
+library(network)
+library("intergraph")
+Highschool<-graph_from_data_frame(highschool_edges,directed = FALSE,vertices = highschool_nodes)
+net_Highschool<-asNetwork(Highschool)
+net_Highschool %e% "gender" <- highschool_att$Gender
+net_Highschool %v% "hall" <- highschool_att$Hall
+
+model <- ergm(net_Highschool ~ edges + nodematch("gender") + nodematch("hall"))
+
+summary(model)
+```
+
+## Question 5
+
+```{r}
+#Codes to customize community and calculate modularity:
+### customize community by gender ###
+genderCommunity<-V(Highschool)$gender
+genderCommunity<-replace(genderCommunity, genderCommunity=="female",1)
+genderCommunity<-replace(genderCommunity, genderCommunity=="male",2)
+genderCommunity<-replace(genderCommunity, genderCommunity=="unknown",3)
+genderCommunity<-as.numeric(genderCommunity)
+
+hallCommunity<-V(Highschool)$hall
+hallCommunity<-replace(hallCommunity,hallCommunity=="1501",1)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1502",2)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1503",3)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1504",4)
+hallCommunity<-replace(hallCommunity,hallCommunity=="1505",5)
+hallCommunity<-as.numeric(hallCommunity)
+
+#clustering
+gender.clustering <- make_clusters(Highschool, membership=genderCommunity)
+hall.clustering <- make_clusters(Highschool, membership=hallCommunity)
+
+#modularity
+paste0('gender modularity ', modularity(gender.clustering))
+paste0('hall modularity ', modularity(hall.clustering))
+
+### Louvain algorithm ###
+Louv<-cluster_louvain(Highschool)
+modularity(Louv)
+
+```
+
+```{r}
+
+#Codes to visualize the network and calculate subgraph density:
+## visualize the network by gender###
+library(RColorBrewer)
+coul <- brewer.pal(length(unique( Louv$membership)), "Set2")
+my_color <- coul[as.numeric(Louv$membership)]
+set.seed(10)
+plot(Highschool, vertex.color = my_color,
+ vertex.size=5,
+ layout=layout_nicely(Highschool), vertex.label=NA,
+ main="Highschool network by moduarity")
+legend("bottomleft", legend= unique(Louv$membership) ,col = coul , bty =
+"n", pch=20 , pt.cex = 1.5, cex = 1.5, horiz = FALSE, inset = c(0.1, 0.1))
+
+``` 
 
 
+```{r}
 
+#Codes to visualize the network and calculate subgraph density:
+## visualize the network by gender###
+library(RColorBrewer)
+coul <- brewer.pal(length(unique( V(Highschool)$hall)), "Set2")
+my_color <- coul[as.numeric(as.factor(V(Highschool)$hall))]
+set.seed(10)
+plot(Highschool, vertex.color = my_color,
+ vertex.size=5,
+ layout=layout_nicely(Highschool),vertex.label=NA,
+ main="Highschool network by hall")
+  legend("bottomleft", legend=levels(as.factor(V(Highschool)$hall)) ,col = coul , bty =
+"n", pch=20 , pt.cex = 1.5, cex = 1.5, horiz = FALSE, inset = c(0.1, 0.1))
 
 ```
