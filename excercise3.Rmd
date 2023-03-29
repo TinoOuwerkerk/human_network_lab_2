@@ -1,0 +1,73 @@
+---
+title: "excercise3"
+author: "tino"
+date: "2023-03-29"
+output: html_document
+---
+
+## Libraries
+
+```{r}
+#call library
+library(igraph)
+library(RColorBrewer)
+library(visNetwork)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+setwd("C:/Users/tinot/uu/human_network_lab_2")
+#datainput
+highschool_edge<-read.csv("Highschool_network_edge.csv",header=FALSE)
+highschool_att<-read.csv("Highschool_network_att.csv",header = TRUE)
+```
+
+## Network
+
+```{r}
+#build high school network
+highschool_nodes<-data.frame(name=as.character(highschool_att$NodeID),
+ gender=as.character(highschool_att$Gender),
+ hall=as.character(highschool_att$Hall))
+highschool_edges<-data.frame(from=c(as.character(highschool_edge[,1])),
+ to=c(as.character(highschool_edge[,2])))
+Highschool<-graph_from_data_frame(highschool_edges,directed = FALSE,vertices =
+highschool_nodes)
+co <- components(Highschool)
+Highschool <- induced.subgraph(Highschool, which(co$membership == which.max(co$csize)))
+
+#use only the largest component for analysis
+summary(Highschool)
+
+Highschool_interactive_layout<-visNetwork(data.frame(id=V(Highschool)$name),
+                                          highschool_edges, main = "Highschool",submain="Can zoom in/out to check the IDs and
+ties") %>%
+  visIgraphLayout(layout = "layout_nicely",smooth = FALSE) %>%
+  visNodes(shape="circle",label = TRUE) %>%
+  visOptions(highlightNearest = list(enabled = T, hover = T), nodesIdSelection = T)
+Highschool_interactive_layout
+print('transitivity:')
+transitivity(Highschool)
+print('average path length:')
+average.path.length(Highschool)
+```
+
+## Question 10
+
+```{r}
+avg_path_length <- average.path.length(Highschool)
+print(paste0('avg path length:', avg_path_length))
+for (i in 1:nrow(highschool_edges)) {
+  # remove an edge
+  graph2 <- delete.edges(Highschool, i)
+  
+  # Calculate the new average path length
+  new_avg_path_length <- average.path.length(graph2)
+  
+  # Check if the new average path length is greater than the current one
+  if (new_avg_path_length > avg_path_length*1.0125) {
+  # Print out the IDs of the source and target nodes for the edge that was removed
+  print(paste('deleted edge:', highschool_edges[i,1], "-", highschool_edges[i,2]))
+  print(paste0('new_avg_path_length:' ,new_avg_path_length))
+  }
+}
+```
