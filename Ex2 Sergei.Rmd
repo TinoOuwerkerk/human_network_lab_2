@@ -2,6 +2,7 @@
 title: "R Notebook"
 output: html_notebook
 ---
+
 ```{r}
 #call library
 library(igraph)
@@ -100,9 +101,68 @@ ggplot(data) +
 
 ```
 
+```{r}
+g0 <- barabasi.game(100, power = 0.5 , m = NULL, out.dist = NULL, out.seq = NULL, out.pref = FALSE, zero.appeal = 1, directed = FALSE,algorithm ="psumtree", start.graph = NULL) 
+
+g1 <- barabasi.game(100, power = 1 , m = NULL, out.dist = NULL, out.seq = NULL, out.pref = FALSE, zero.appeal = 1, directed = FALSE,algorithm ="psumtree", start.graph = NULL) 
+
+g1_5 <- barabasi.game(100, power = 1.5 , m = NULL, out.dist = NULL, out.seq = NULL, out.pref = FALSE, zero.appeal = 1, directed = FALSE,algorithm ="psumtree", start.graph = NULL) 
+
+g2 <- barabasi.game(100, power = 2 , m = NULL, out.dist = NULL, out.seq = NULL, out.pref = FALSE, zero.appeal = 1, directed = FALSE,algorithm ="psumtree", start.graph = NULL) 
+
+plot(g0, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,layout = layout_nicely(g0), main = "Scale-free network model, power=0.5")
+
+plot(g1, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,layout = layout_nicely(g1), main = "Scale-free network model, power=1")
+
+plot(g1_5, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,layout = layout_nicely(g1_5), main = "Scale-free network model, power=1.5")
+
+plot(g2, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,layout = layout_nicely(g2), main = "Scale-free network model, power=2")
+
+```
+
+# Question 9
 
 ```{r}
-g0 <- barabasi.game(100, power = 1.0, m = NULL, out.dist = NULL, out.seq = NULL, out.pref = FALSE, zero.appeal = 1, directed = FALSE,algorithm ="psumtree", start.graph = NULL)
-plot(g0, vertex.label= NA, edge.arrow.size=0.02, vertex.size = degree,layout = layout_nicely(g0), main = "Scale-free network model, power=1.5")
+library(igraph)
+set.seed(100)
+random_n <- sample(1:100, 1)
+subset_random_05 <- igraph::delete.vertices(g0, V(g0) ==  random_n)
+subset_random_15 <- igraph::delete.vertices(g1_5, V(g1_5) ==  random_n)
+
+degree_FB <- degree(subset_random_05, mode = "all") %>% sort(T) 
+
+node_with_max05 <- degree(g0) == max(degree(g0))
+node_with_max15 <- max(degree(g1_5))
+
+subset_target_05 <- igraph::delete.vertices(g0, V(g0) == match(max(degree(g0)), degree(g0)))
+subset_target_15 <- igraph::delete.vertices(g1_5, V(g1_5) == match(max(degree(g1_5)), degree(g1_5)))
+
+
+diameter(g0)
+diameter(g1_5)
+
+diameter(subset_random_05)
+diameter(subset_random_15)
+
+diameter(subset_target_05)
+diameter(subset_target_15, unconnected = T)
+
+count_components(subset_random_05)
+count_components(subset_random_15)
+
+count_components(subset_target_05)
+count_components(subset_target_15)
+```
+
+```{r}
+
+
+plot(subset_random_05, vertex.label= NA, edge.arrow.size=2.9,xlim = c(-1, 1), ylim = c(-1, 1) , vertex.size = 4 ,layout = layout_nicely(subset_random_05), xlab = "Random attack on network model, power=0.5")
+
+plot(subset_random_15, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,xlim = c(-1, 1), ylim = c(-1, 1),layout = layout_nicely(subset_random_15), xlab = "Random attack on network model, power=1.5")
+
+plot(subset_target_05, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,xlim = c(-1, 1), ylim = c(-1, 1),layout = layout_nicely(subset_target_05), xlab = "Target attack on network model, power=0.5")
+
+plot(subset_target_15, vertex.label= NA, edge.arrow.size=2.9, vertex.size = 4 ,xlim = c(-1, 1), ylim = c(-1, 1),layout = layout_nicely(subset_target_15), xlab = "Target attack on network model, power=1.5")
 
 ```
