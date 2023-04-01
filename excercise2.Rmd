@@ -103,5 +103,3 @@ ggplot(data) +
   theme_minimal()
 
 ```
-
-
