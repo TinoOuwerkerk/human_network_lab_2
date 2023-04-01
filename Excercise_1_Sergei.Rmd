@@ -214,20 +214,20 @@ ggplot(degree_distribution, aes(x = degree, y = frequency)) +
   labs(title = "Degree distribution for Facebook")+
   theme_minimal()
 
-quantiles <- quantile(fb_distance, prob=probs) + 2
+#quantiles <- quantile(fb_distance, prob=probs) + 2
 
-FB_count %>%
-  ggplot(aes(x = fb_distance, y = fraction))+
-  geom_bar(stat = "identity") +
-  geom_vline(xintercept = quantiles[1] , colour="red", linetype="dotdash") +
-  geom_vline(xintercept = quantiles[2] , colour="red", linetype="dotdash" ) +
-  geom_label(aes(x = quantiles[1]   , y = 0.025, label ="q: 0.5")) +
-  geom_label(aes(x = quantiles[2] , y = 0.025, label = "q: 0.9 ")) +
-  scale_y_continuous(labels = scales::percent)+
-  xlab("Shortest path length") +
-  ylab("% of total count by group")+ 
-  labs(title = "Shortest path distribution for Facebook")+
-  theme_minimal()
+#FB_count %>%
+#  ggplot(aes(x = fb_distance, y = fraction))+
+#  geom_bar(stat = "identity") +
+#  geom_vline(xintercept = quantiles[1] , colour="red", linetype="dotdash") +
+#  geom_vline(xintercept = quantiles[2] , colour="red", linetype="dotdash" ) +
+#  geom_label(aes(x = quantiles[1]   , y = 0.025, label ="q: 0.5")) +
+#  geom_label(aes(x = quantiles[2] , y = 0.025, label = "q: 0.9 ")) +
+#  scale_y_continuous(labels = scales::percent)+
+#  xlab("Shortest path length") +
+#  ylab("% of total count by group")+ 
+#  labs(title = "Shortest path distribution for Facebook")+
+#  theme_minimal()
 ```
 
 ```{r}
