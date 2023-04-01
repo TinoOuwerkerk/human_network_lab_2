@@ -1,13 +1,17 @@
 ---
-title: "excercise3"
-author: "tino"
-date: "2023-03-29"
+title: "EX3_sergei"
+author: "Sergei"
+date: "2023-03-31"
 output: html_document
 ---
 
-## Libraries
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-```{r}
+
+
+```{r cars}
 #call library
 library(igraph)
 library(RColorBrewer)
@@ -21,9 +25,8 @@ highschool_edge<-read.csv("Highschool_network_edge.csv",header=FALSE)
 highschool_att<-read.csv("Highschool_network_att.csv",header = TRUE)
 ```
 
-## Network
 
-```{r}
+```{r pressure, echo=FALSE}
 #build high school network
 highschool_nodes<-data.frame(name=as.character(highschool_att$NodeID),
  gender=as.character(highschool_att$Gender),
@@ -51,12 +54,12 @@ print('average path length:')
 average.path.length(Highschool)
 ```
 
-## Question 10
-
 ```{r}
+
 avg_path_length <- average.path.length(Highschool)
 print(paste0('avg path length:', avg_path_length))
-for (i in 1:nrow(highschool_edges)) {
+candidates <- c()
+for (i in 1:nrow((highschool_edges))) {
   # remove an edge
   graph2 <- delete.edges(Highschool, i)
   
@@ -68,6 +71,14 @@ for (i in 1:nrow(highschool_edges)) {
   # Print out the IDs of the source and target nodes for the edge that was removed
   print(paste('deleted edge:', highschool_edges[i,1], "-", highschool_edges[i,2]))
   print(paste0('new_avg_path_length:' ,new_avg_path_length))
+  candidates <- append(candidates, i)  
   }
 }
+
+graph <- delete.edges(Highschool, candidates)
+average.path.length(graph)
+my_subset <- data.frame(
+    from = highschool_edges$from[candidates],
+    to = highschool_edges$to[candidates])
 ```
+
