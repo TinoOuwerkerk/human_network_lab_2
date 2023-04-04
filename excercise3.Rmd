@@ -54,6 +54,7 @@ average.path.length(Highschool)
 ## Question 10
 
 ```{r}
+li = list()
 avg_path_length <- average.path.length(Highschool)
 print(paste0('avg path length:', avg_path_length))
 for (i in 1:nrow(highschool_edges)) {
@@ -65,9 +66,129 @@ for (i in 1:nrow(highschool_edges)) {
   
   # Check if the new average path length is greater than the current one
   if (new_avg_path_length > avg_path_length*1.0125) {
+    li <- append(li, i)
   # Print out the IDs of the source and target nodes for the edge that was removed
   print(paste('deleted edge:', highschool_edges[i,1], "-", highschool_edges[i,2]))
-  print(paste0('new_avg_path_length:' ,new_avg_path_length))
+  print(paste0('new_avg_path_length:', new_avg_path_length))
   }
 }
+```
+
+## Question 11
+
+```{r}
+stopifnot(require(data.table))
+stopifnot(require(Matrix))
+calculate_value <- function(node, each_neighbors,Pprob){
+ return(each_neighbors[[node]][ which(runif(length(each_neighbors[[node]]), 0, 1)<=Pprob)])
+ #'runif' is a function to generate random number in R
+}
+#This function:
+#1) searches the neighbors of contagious node;
+#2) To those who are connected to a contagious node, generates a random number and compare to the
+#probability of p, if random number<p, this node will be infected and return the value of 1
+IC<-function(node_seed,network,Pprob){
+
+ #prepare input for the 'calculate_value' function#
+ adj_matrix <- igraph::as_adjacency_matrix(network, type = 'both')
+ each_neighbors <- which(adj_matrix > 0, arr.ind = TRUE)
+ each_neighbors <- split(each_neighbors[, 2], each_neighbors[, 1]) #get the neigbhour list of each node
+
+ nNode<-vcount(network)
+ node_status <- rep.int(0, nNode) #start from a healthy population
+ day_infected<-vector()#Total number of infected population
+ new_infected <- list() # Record the ID of person getting infected at each time step
+
+ day<-1
+ node_status[as.numeric(node_seed)] <- 1 # infected(value=1) health(value=0)
+ day_infected[day] <- sum(node_status )
+ new_infected[[day]]<-node_seed #The ID of the person infected in Day 1 (Patient Zero)
+
+ #simulate the spread of virus within 4 weeks##
+ for (day in c(2:28)){
+ ContagiousID<-which(node_status == 1)
+ infectedID<-unlist(lapply(ContagiousID,calculate_value,each_neighbors,Pprob))
+ newinfectedID<- setdiff(infectedID, which(node_status == 1))
+
+ #Update the node status and other variables
+ node_status[newinfectedID] <- 1
+ day_infected[day] <- length(newinfectedID)
+ new_infected[[day]]<-newinfectedID
+
+ day=day+1
+ }
+ return(day_infected) #return the number of newly infected people by day
+ #return(list(day_infected,new_infected)) #if you want to see the ID of infected ppl in each day,use this command instead
+}
+```
+
+```{r}
+tel = 0
+for (i in 0:99){
+  tel = tel + IC("5", Highschool, 0.15)
+}
+as.integer(tel/100)
+```
+
+## Question 12
+
+```{r}
+# Delete edges that reduce average path length
+Highschool2 <- delete.edges(Highschool, li)
+```
+
+```{r}
+# Identify strong ties using edge betweenness
+eb <- edge_betweenness(Highschool2)
+strong_edges <- which(eb >= quantile(eb, 0.989)) #strongest edges of the network (highest betweennes)
+strong_ties <- E(Highschool2)[strong_edges] # Select the strongest ties
+
+Highschool3 <- delete.edges(Highschool2, strong_ties)
+```
+
+```{r}
+strong_ties
+```
+
+```{r}
+Highschool_interactive_layout2<-visNetwork(data.frame(id=V(Highschool2)$name),
+                                          highschool_edges, main = "Highschool2",submain="Can zoom in/out to check the IDs and
+ties") %>%
+  visIgraphLayout(layout = "layout_nicely",smooth = FALSE) %>%
+  visNodes(shape="circle",label = TRUE) %>%
+  visOptions(highlightNearest = list(enabled = T, hover = T), nodesIdSelection = T)
+Highschool_interactive_layout2
+```
+
+```{r}
+infected <- function(network1, network2, network3, p=0.15){
+tel1 = 0
+tel2 = 0
+tel3 = 0
+for (i in 0:99){
+  tel1 = tel1 + IC("5", network1, p)
+  tel2 = tel2 + IC("5", network2, p)
+  tel3 = tel3 + IC("5", network3, p)
+}
+tel = as.integer(tel/100)
+print(tel)
+len <- 1:length(tel)-1
+
+ggplot() + geom_smooth(aes(len, tel1, color='black')) +
+  geom_smooth(aes(len, tel2, color='red')) +
+  geom_smooth(aes(len, tel3, color='blue')) +
+       scale_fill_discrete(labels=c('Highschool', 'Highschool2', 'Highschool3')) 
+}
+```
+
+```{r}
+infected(Highschool, Highschool2, Highschool3)
+```
+
+```{r}
+infected(Highschool, Highschool2, Highschool3, 0.01)
+```
+
+```{r}
+infected(Highschool, Highschool2, Highschool3, 0.9)
 ```
