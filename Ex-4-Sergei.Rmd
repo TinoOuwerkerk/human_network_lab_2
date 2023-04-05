@@ -51,21 +51,21 @@ ties") %>%
 Highschool_interactive_layout
 ```
 
-#IC contagion model
-
-[Apply degree heuristics and betweenness heuristics to the IC model you have developed in Question 11 (! Please change the initially infected node to S107!). Answer the following questions (Question 17, 5 points):]{.underline}
-
-1)    [You can immunize 3 nodes in the network, which after immunization, will never spread the virus to other connected nodes. According to degree heuristics and betweenness heuristics, which 3 nodes should be immunized in order to contain the virus]{.underline}
-
-*Answer*:
-
--   according to degree heuristic: S54, S20, S110
-
--   according to degree heuristic: S37, S4, S96
-
-2)    [Immunize the 3 nodes suggested by degree heuristics and betweenness heuristics, respectively, which heuristic provides the better outcome regarding a) the final activated number of people and b) flattening the daily infection curve (please provide figure in your answer)?]{.underline}
-
-3)    [Do you think the observation in 2) (i.e., degree heuristic preforms better than betweenness heuristics, or the opposite) is sensitive to a) the network structure and b) parameter in the IC model? And Why?]{.underline}
+# #IC contagion model
+# 
+# [Apply degree heuristics and betweenness heuristics to the IC model you have developed in Question 11 (! Please change the # initially infected node to S107!). Answer the following questions (Question 17, 5 points):]{.underline}
+# 
+# 1)    [You can immunize 3 nodes in the network, which after immunization, will never spread the virus to other connected # nodes. According to degree heuristics and betweenness heuristics, which 3 nodes should be immunized in order to contain the # virus]{.underline}
+# 
+# *Answer*:
+# 
+# -   according to degree heuristic: S54, S20, S110
+# 
+# -   according to degree heuristic: S37, S4, S96
+# 
+# 2)    [Immunize the 3 nodes suggested by degree heuristics and betweenness heuristics, respectively, which heuristic # provides the better outcome regarding a) the final activated number of people and b) flattening the daily infection curve # (please provide figure in your answer)?]{.underline}
+# 
+# 3)    [Do you think the observation in 2) (i.e., degree heuristic preforms better than betweenness heuristics, or the # opposite) is sensitive to a) the network structure and b) parameter in the IC model? And Why?]{.underline}
 
 ```{r, message=F}
 stopifnot(require(data.table))
@@ -96,11 +96,14 @@ IC<-function(node_seed,network,Pprob, immunized = c(), n_days = 28 ){
  new_infected[[day]]<-node_seed #The ID of the person infected in Day 1 (Patient Zero)
  infected_number = 0 
  number_day <- c()
+ 
  #simulate the spread of virus within 4 weeks##
  for (day in c(2:n_days)){
  ContagiousID<-which(node_status == 1)
  infectedID<-unlist(lapply(ContagiousID,calculate_value,each_neighbors,Pprob))
+ 
  infectedID <- setdiff(infectedID, immunized) 
+ 
  newinfectedID<- setdiff(infectedID, which(node_status == 1))
  
  #Update the node status and other variables
@@ -129,6 +132,7 @@ betweenness_n[1:3]
 no_immune <- IC("107", Highschool, 0.1)
 degree_immune <- IC("107", Highschool, 0.1, c(54,20, 110))
 betweenness_immune <- IC("107", Highschool, 0.1, c(37,4, 96 ))
+
 days <- seq(1:28)
 immune_df <- data.frame(days= days,
            not_immune = no_immune,
@@ -165,21 +169,24 @@ final_number <- function(network1, network2, network3, p=0.8){
 ```
 
 ```{r}
-infected <- function(network1, network2, network3, p=0.8){
+infected <- function(network1, network2, network3,network4, p=0.1){
 tel1 = 0
 tel2 = 0
 tel3 = 0
+tel4 = 0 
 
 for (i in 0:99){
-  tel1 = tel1 + IC("107", network1, p,c(), 40)
-  tel2 = tel2 + IC("107", network2, p, c(54,20, 110), 40)
-  tel3 = tel3 + IC("107", network3, p, c(37,4, 96 ), 40)
+  tel1 = tel1 + IC("107", network1, p,c(), 28)
+  tel2 = tel2 + IC("107", network2, p, c(54,20, 110), 28)
+  tel3 = tel3 + IC("107", network3, p, c(37,4, 96 ), 28)
+  tel4 = tel4 + IC("107", network4, p, c(37, 21, 9), 28)
 
 }
 
 tel1 = as.integer(tel1/100)
 tel2 = as.integer(tel2/100)
 tel3 = as.integer(tel3/100)
+tel4 = as.integer(tel4/100)
 len <- 1:length(tel1)-1
 
 ggplot() + geom_smooth(aes(len, tel1, colour='No Immunity'), se =F) +
@@ -194,7 +201,7 @@ ggplot() + geom_smooth(aes(len, tel1, colour='No Immunity'), se =F) +
 ```
 
 ```{r}
-infected(g1_5, g1_5, g1_5, 0.06)
+infected(Highschool, Highschool, Highschool, 0.15)
 ```
 
 ```{r}
@@ -236,7 +243,7 @@ ggplot() + geom_smooth(aes(len, tel1, colour='No Immunity'), se =F) +
   labs(x = "Days", y = "Average Number of infected nodes", title = paste("Average Number of infected nodes in Barabasi model")
         )+
   theme_minimal()
-}
+}c
 
 ```
 
@@ -292,4 +299,79 @@ greedy_IC<-function(node_seed,network,Pprob, immunized = c(), n_days = 28 ){
  return(day_infected ) #return the number of newly infected people by day
  #return(list(day_infected,new_infected)) #if you want to see the ID of infected ppl in each day,use this command instead
 }
+```
+
+
+# Checking the greedy
+
+```{r}
+final_number_greedy <- function(node_number, network1, network2, network3, network4, p=0.15){
+  sum1 = 0
+  sum2 = 0
+  sum3 = 0
+  sum4 = 0
+  # node_number <- paste(sample(1:300, 1))
+  for (i in 0:99){
+    no_immune <- IC(node_number, network1, p)
+    degree_immune <- IC(node_number, network2, p, c(54,20, 110))
+    betweenness_immune <- IC(node_number, network3, p, c(37,4, 96 ))
+    greedy = IC(node_number, network4, p, c(37, 21, 9), 28)
+     sum1= sum1 + sum(no_immune)
+     sum2= sum2 + sum(degree_immune)
+     sum3= sum3 + sum(betweenness_immune)
+     sum4= sum4 + sum(betweenness_immune)
+  }
+  sum1 = as.integer(sum1/100)
+  sum2 = as.integer(sum2/100)
+  sum3 = as.integer(sum3/100)
+  sum4 = as.integer(sum4/100)
+  len <- 1:length(sum1)-1
+
+  return(c(sum1,sum2,sum3, sum4))
+}
+```
+
+
+
+```{r}
+infected_greedy <- function(node_number, network1, network2, network3, network4, p=0.15){
+tel1 = 0
+tel2 = 0
+tel3 = 0
+tel4 = 0
+# node_number <- paste(sample(1:122, 1))
+for (i in 0:100){
+  tel1 = tel1 + IC(node_number, network1, p, c(), 28)
+  tel2 = tel2 + IC(node_number, network2, p, c(54,20, 110), 28)
+  tel3 = tel3 + IC(node_number, network3, p, c(37, 4, 96 ), 28)
+  tel4 = tel4 + IC(node_number, network4, p, c(37, 21, 9), 28)
+
+}
+
+tel1 = as.integer(tel1/100)
+tel2 = as.integer(tel2/100)
+tel3 = as.integer(tel3/100)
+tel4 = as.integer(tel4/100)
+len <- 1:length(tel1)-1
+
+ggplot() + geom_smooth(aes(len, tel1, colour='No Immunity'), se =F) +
+  geom_smooth(aes(len, tel2, colour='Degree heuristic'), se =F) +
+  geom_smooth(aes(len, tel3, colour='Betweenness heuristic'), se =F) +
+  geom_smooth(aes(len, tel4, colour='Greedy'), se =F) +
+       scale_fill_discrete(labels=c('Highschool', 'Highschool2', 'Highschool3'))+  
+  labs(x = "Days", y = "Average Number of infected nodes", title = paste("Average Number of infected nodes of 100 MC simulations in Highschool network")
+        )+
+  theme_minimal()
+}
+
+```
+
+
+```{r}
+final_number_greedy(107, Highschool, Highschool, Highschool, Highschool,p =  0.01)
+
+```
+
+```{r}
+infected_greedy(107, Highschool, Highschool, Highschool, Highschool, p =  0.15)
 ```
