@@ -179,7 +179,7 @@ for (i in 0:99){
   tel1 = tel1 + IC("107", network1, p,c(), 28)
   tel2 = tel2 + IC("107", network2, p, c(54,20, 110), 28)
   tel3 = tel3 + IC("107", network3, p, c(37,4, 96 ), 28)
-  tel4 = tel4 + IC("107", network4, p, c(37, 21, 9), 28)
+  tel4 = tel4 + IC("107", network4, p, c(36, 118, 97), 28)
 
 }
 
@@ -344,7 +344,7 @@ for (i in 0:100){
   tel1 = tel1 + IC(node_number, network1, p, c(), 28)
   tel2 = tel2 + IC(node_number, network2, p, c(54,20, 110), 28)
   tel3 = tel3 + IC(node_number, network3, p, c(37, 4, 96 ), 28)
-  tel4 = tel4 + IC(node_number, network4, p, c(37, 21, 9), 28)
+  tel4 = tel4 + IC(node_number, network4, p, c(36, 119, 97 ), 28)
 
 }
 
