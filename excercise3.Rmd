@@ -138,16 +138,15 @@ Highschool2 <- delete.edges(Highschool, li)
 ```
 
 ```{r}
-# Identify strong ties using edge betweenness
-eb <- edge_betweenness(Highschool2)
-strong_edges <- which(eb >= quantile(eb, 0.989)) #strongest edges of the network (highest betweennes)
-strong_ties <- E(Highschool2)[strong_edges] # Select the strongest ties
+# Identify strong ties using k-core algorithm
+k_cores <- coreness(Highschool2)
 
-Highschool3 <- delete.edges(Highschool2, strong_ties)
-```
+# Extract the nodes that belong to the strongest k-core subgraph
+strong_ties <- V(Highschool2)[which(k_cores == max(k_cores))]
 
-```{r}
-strong_ties
+# Print the nodes in the strongest k-core subgraph
+print(strong_ties)
+#Highschool3 <- delete.edges(Highschool2, strong_ties)
 ```
 
 ```{r}
