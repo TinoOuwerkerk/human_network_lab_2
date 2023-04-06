@@ -368,7 +368,7 @@ ggplot() + geom_smooth(aes(len, tel1, colour='No Immunity'), se =F) +
 
 
 ```{r}
-final_number_greedy(107, Highschool, Highschool, Highschool, Highschool,p =  0.01)
+final_number_greedy(107, Highschool, Highschool, Highschool, Highschool,p =  0.06)
 
 ```
 
