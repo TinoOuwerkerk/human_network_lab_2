@@ -66,7 +66,7 @@ def IC(g,S,p=0.5,mc=1000, timestamps = 28):
             if new_active == []:
                 break
             # Add newly activated nodes to the set of activated nodes
-            Active += new_active
+            Active = list(set(Active).union(set(new_active)))
             
         spread.append(len(Active))
         sum_spread.append(sum)
@@ -91,7 +91,7 @@ def IC_immunized(g, S, immunized, p=0.15, mc=1000, timestamps = 28):
     """
     
     # Loop over the Monte-Carlo Simulations
-    spread, sum_spread, infected_a_day = [], [], []
+    spread, sum_spread, infected_a_day= [], [], []
     for i in range(mc):
         S = list(set(S).difference(set(immunized)))
         # Simulate propagation process
@@ -103,29 +103,29 @@ def IC_immunized(g, S, immunized, p=0.15, mc=1000, timestamps = 28):
             # For each active node, find its neighbors that become activated
             for node in Active:
                 np.random.seed(i)
-
                 # Determine neighbors that become infected
-                success = np.random.uniform(0,1,len(g.neighbors(node,mode="out"))) < p
+                success = np.random.uniform(0,1, len(g.neighbors(node,mode="out"))) <= p
                 new_ones += list(np.extract(success, g.neighbors(node,mode="out")))
                 new_ones = list(set(new_ones).difference(set(immunized)))
+                
             
-            new_active = list(set(new_ones) - set(Active))
-            infected_per_day.append(len(new_active))
-            
+            new_active = list(set(new_ones).difference(set(Active)))
+            print(new_active)
             # in case the network is fully activated
             if new_active == []:
                 break
 
             sum += len(Active) 
+            infected_per_day.append(len(new_active))
+
             # Add newly activated nodes to the set of activated nodes
-            Active += new_active
+            Active = list(set(Active).union(set(new_active)))
             
         spread.append(len(Active))
         sum_spread.append(sum)
         infected_a_day.append(infected_per_day)
         
     return(np.mean(spread), np.mean(sum_spread), compute_mean_by_index(infected_a_day))
-
 
 def greedy(g, k, p=0.15,mc=1000, timestamps = 28):
     """
