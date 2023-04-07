@@ -44,8 +44,14 @@ ties") %>%
   visIgraphLayout(layout = "layout_nicely",smooth = FALSE) %>%
   visNodes(shape="circle",label = TRUE) %>%
   visOptions(highlightNearest = list(enabled = T, hover = T), nodesIdSelection = T)
-Highschool_interactive_layout
-print('transitivity:')
+
+```
+
+```{r}
+
+```
+
+```{print('transitivity:')}
 transitivity(Highschool)
 print('average path length:')
 average.path.length(Highschool)
@@ -246,4 +252,97 @@ SIR <- function(network, node_seed = "5", Pprob = 0.15) {
 
 results <- SIR(Highschool)
 results
+```
+
+## Question 14
+
+```{r}
+
+threshold_model <- function(network, node_seed, threshold, n_day){
+
+  nNode <- vcount(network)
+  node_status <- rep.int(0, nNode) # start from a healthy population
+  adj_matrix <- igraph::as_adjacency_matrix(network, type = 'both')
+  each_neighbors <- which(adj_matrix > 0, arr.ind = TRUE)
+  each_neighbors <- split(each_neighbors[, 2], each_neighbors[, 1]) # get the neighbour list of each node
+  
+  
+  day <- 1
+  for (seed in node_seed){
+    node_status[as.numeric(node_seed)] <- 1 # adopt(value=1) dont adopt(value=0)
+  }
+    
+    for (day in 2:n_day) {
+      for (node in 1:nNode) {
+        if (node_status[node] == 0) {
+          neighbours <- each_neighbors[[node]]
+          n_neighbors <- length(neighbours)
+          n_adopters <- sum(node_status[neighbours] == 1)
+          if(n_adopters > n_neighbors * threshold[node]){
+            node_status[node] <- 1
+          }
+        }
+      }
+    }
+  
+  
+  return(sum(node_status==1))
+}
+threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Threshold, 10000)
+
+```
+
+```{r}
+Highschool_interactive_layout
+```
+
+```{r}
+stopifnot(require(data.table))
+stopifnot(require(Matrix))
+calculate_adoptedNei <- function(node, node_status, each_neighbors){
+ return(mean(node_status[each_neighbors[[node]]] == 1)) ### to calculate the percentage of adopted
+neigbhours
+}
+ThModel<-function(node_seed,network,threshold){
+ #prepare input for the 'calculate_value' function#
+ adj_matrix <- igraph::as_adjacency_matrix(network, type = 'both')
+ each_neighbors <- which(adj_matrix > 0, arr.ind = TRUE)
+ each_neighbors <- split(each_neighbors[, 2], each_neighbors[, 1]) #get the neigbhour list of each node
+
+ nNode<-vcount(network)
+ node_status <- rep.int(0, nNode)
+ neighbour_status<-rep.int(0, nNode) ##percentage of adopted neighbours
+ new_infected <- list()
+ day_total_infected <- rep(0,28) ### Total number of active people by end of each day
+
+
+ ### Day 1 ####
+ day <- 1
+ node_status[as.numeric((node_seed))] <- 1
+ new_infected[[day]] <-node_seed
+ day_total_infected[day]=sum(node_status == 1)
+ ####
+
+ for (day in c(2:28)){
+ NotAdopted <- which(node_status == 0)
+ Adopted <- which(node_status == 1)
+
+ neighbour_status[NotAdopted] <- unlist(lapply(NotAdopted, calculate_adoptedNei, node_status,each_neighbors))
+
+ new_infected[[day]] <- setdiff(which(neighbour_status > threshold), Adopted)
+ node_status[new_infected[[day]]] <- 1 #update the staus to 1 for those newly adopted
+ day_total_infected[day] <- sum(node_status)
+
+ day <- day + 1
+ }
+ #return(day_total_infected)
+ return(list(day_total_infected,new_infected))
+}
+ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Threshold)
+```
+
+## Question 15
+
+```{r}
+ecdf(Highschool_attributes$Threshold)
 ```
