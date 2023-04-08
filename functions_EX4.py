@@ -287,7 +287,7 @@ def th_model(seed: list, network: Graph, threshold: list, immunized, mc, Monte_C
             neighbour_status = {node : calculate_adopted_nei(node, node_status, each_neighbors) for node in range(n_node)}
             infected = []
             for node in adopted:
-                for neighbour in g.neighbors(node):
+                for neighbour in network.neighbors(node):
                     if neighbour_status[neighbour] >= threshold[node]: 
                         infected.append(neighbour)
             
