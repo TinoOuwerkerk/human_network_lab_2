@@ -45,13 +45,6 @@ ties") %>%
   visNodes(shape="circle",label = TRUE) %>%
   visOptions(highlightNearest = list(enabled = T, hover = T), nodesIdSelection = T)
 
-```
-
-```{r}
-
-```
-
-```{print('transitivity:')}
 transitivity(Highschool)
 print('average path length:')
 average.path.length(Highschool)
@@ -344,5 +337,34 @@ ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Threshold
 ## Question 15
 
 ```{r}
-ecdf(Highschool_attributes$Threshold)
+x <- highschool_att$Threshold
+# create a sample dataset
+my_list <- c(rep(0, 15), rep(0.1, 5), rep(0.2, 5), 0.3, rep(0.4, 2), rep(0.5, 2), 0.6, 0.7, 0.8, rep(0.9, 4), rep(1, 85))
+
+# plot the empirical distribution
+plot(my_list, main="Empirical Distribution")
+# plot the uni distribution
+plot(sort(x), main="Original Threshold Distribution")
+```
+
+```{r}
+highschool_att$Emp <- sample(my_list)
+threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Emp, 28)
+
+#ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Emp)
+```
+
+```{r}
+# Run the simulation n times and store the results in a vector
+n <- 1000
+sum <- replicate(n, threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Emp, 28))
+
+# Calculate the mean of the results
+mean(sum)
+```
+
+## Question 16
+
+```{r}
+
 ```
