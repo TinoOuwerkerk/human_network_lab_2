@@ -30,7 +30,7 @@ networked_sir <- function(X0, G, beta, gamma, tmax) {
     st <- length(which(X == 0))
     it <- length(which(X == 1))
     rt <- length(which(X == 2))
-
+    new_inf <- c()
     # Initialize data matrix with observations
     df <- data.frame(t = 0, s = st, i = it, r = rt)
     dm <- as.matrix(df)  # Matrix is faster than data frame to update
@@ -44,7 +44,7 @@ networked_sir <- function(X0, G, beta, gamma, tmax) {
       if(X[i] == 0) {  # If susceptible
         neighbour_indices <- adj_list[[i]]
         num_inf_neighbours[i] <- length(which(X[neighbour_indices] == 1))
-        lambda[i] <- beta*num_inf_neighbours[i]
+        lambda[i] <- beta#*num_inf_neighbours[i]
       } else if(X[i] == 1) {  # If infected
         lambda[i] <- gamma
       } else {
@@ -54,7 +54,7 @@ networked_sir <- function(X0, G, beta, gamma, tmax) {
     
     while(t < tmax) {
       lambda0 <- sum(lambda)
-      
+      newly_infected <- 0
       t <- t + 1
       pos_j <- which(X==1)
       for(infect in pos_j){
@@ -72,6 +72,7 @@ networked_sir <- function(X0, G, beta, gamma, tmax) {
               # Bookkeeping
               st <- st - 1
               it <- it + 1
+              newly_infected <- newly_infected+1
             } 
           }
           }
@@ -96,13 +97,15 @@ networked_sir <- function(X0, G, beta, gamma, tmax) {
 
       # Update data matrix
       dm <- rbind(dm,c(t,st,it,rt))
-      print(paste0('day:',t))
-      print(paste0('infected:',length(which(X==1))))
-      print(paste0('recovered:',length(which(X==2))))
+      # print(paste0('day:',t))
+      # print(paste0('newly_infected:',newly_infected))
+      # print(paste0('infected:',length(which(X==1))))
+      # print(paste0('recovered:',length(which(X==2))))
+      new_inf <- append(new_inf, newly_infected)
     }  # end while
     # Return fractions instead of counts
     dm[,c("s","i","r")] <- dm[,c("s","i","r")]/N
     df <- as.data.frame(dm)
     row.names(df) <- NULL  # Remove row names
-    return(list(df = df, G = G, X0 = X0, X = X, beta = beta, gamma = gamma ))
+    return(new_inf)
   }
