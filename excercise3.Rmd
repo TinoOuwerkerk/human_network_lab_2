@@ -347,17 +347,20 @@ plot(my_list, main="Empirical Distribution")
 plot(sort(x), main="Original Threshold Distribution")
 ```
 
+sample(my_list)
+
 ```{r}
 highschool_att$Emp <- sample(my_list)
 threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Emp, 28)
 
-#ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Emp)
+ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Emp)
 ```
 
 ```{r}
 # Run the simulation n times and store the results in a vector
 n <- 1000
-sum <- replicate(n, threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Emp, 28))
+
+sum <- replicate(n, threshold_model(Highschool, list('59', '63', '91', '92', '99'), sample(my_list), 28))
 
 # Calculate the mean of the results
 mean(sum)
