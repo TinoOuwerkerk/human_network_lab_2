@@ -247,6 +247,40 @@ results <- SIR(Highschool)
 results
 ```
 
+## SIR
+
+```{r}
+library(ggplot2)
+library(reshape2)
+
+source("networked-sir.R")
+# Population size
+N <- vcount(Highschool)
+
+repeat {
+  # Degree sequence drawn from geometric distribution
+  # where all vertices have at least one edge
+  dseq <- rgeom(n= N, prob = 0.2) + 1
+  if(is_graphical(dseq)) {
+    break
+  }
+}
+
+# Parameters
+X0 <- rep.int(0, N)
+seed <- 5 # patient zero
+beta <- 0.15 # infection rate
+gamma <- 1
+tmax <- 28
+X0[seed]<-1
+sim <- networked_sir(X0 = X0, G = Highschool, beta = beta, gamma = gamma, tmax = tmax)
+dfm <- melt(sim$df, id.vars = "t")
+ggplot(data = dfm, mapping = aes(t, value, color=variable)) +
+  geom_line() +
+  theme_light()
+
+```
+
 ## Question 14
 
 ```{r}
