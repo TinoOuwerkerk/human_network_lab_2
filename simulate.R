@@ -19,15 +19,6 @@ Highschool <- induced.subgraph(Highschool, which(co$membership == which.max(co$c
 # Population size
 N <- vcount(Highschool)
 
-repeat {
-  # Degree sequence drawn from geometric distribution
-  # where all vertices have at least one edge
-  dseq <- rgeom(n= N, prob = 0.2) + 1
-  if(is_graphical(dseq)) {
-    break
-  }
-}
-
 # Parameters
 X0 <- rep.int(0, N)
 seed <- 5 # patient zero
