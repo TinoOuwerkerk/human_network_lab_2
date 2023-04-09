@@ -209,101 +209,48 @@ def greedy_immunized(g,k,p=0.1,mc=1000):
 
     return(immunaized_list, spread, timelapse)
 
-def calculate_adopted_nei(node: int, node_status: list, each_neighbors: dict) -> float:
-    """
-    Calculate the percentage of adopted neighbors for a given node.
-
-    Parameters:
-    -----------
-    node : int
-        The index of the node for which to calculate the percentage of adopted neighbors.
-    node_status : list
-        A list representing the status (0 or 1) of each node in the network.
-    each_neighbors : dict
-        A dictionary where the keys are node indices and the values are lists of indices of neighbors of each node.
-
-    Returns:
-    --------
-    float
-        The percentage of adopted neighbors for the given node.
-    """
-
-    adopted_nei = [activated for activated in each_neighbors[node] if node_status[activated] == 1]
-    return len(adopted_nei)
-
-def th_model(seed: list, network: Graph, threshold: list, immunized, mc, Monte_Carlo = True) -> tuple:
-    """
-    Implementation of the Threshold Model using igraph in Python.
-
-    Parameters:
-    -----------
-    node_seed : list
-        The index of the seed node for starting the model.
-    network : ig.Graph
-        The input graph object representing the network.
-    threshold : list
-        The threshold value for determining whether a node gets influenced by its neighbors.
-
-    Returns:
-    --------
-    tuple
-        A tuple containing two elements:
-        - A list of integers representing the total number of active people by the end of each day.
-        - A list of lists of integers representing the indices of newly infected nodes for each day.
-    """
-    spread, sum_spread, infected_a_day= [], [], []
+def threshold_model(network, node_seed, threshold, n_day, mc=100, Monte_Carlo=False):
+    spread, sum_spread, infected_per_day, infected_per_iteration = [], [], [], []
     for i in range(mc):
-        if Monte_Carlo == True: 
+        if Monte_Carlo == True:
             np.random.seed(i)
-        # Prepare input for the 'calculate_adopted_nei' function
-        adj_matrix = network.get_adjacency()
-        adj_matrix = np.array(adj_matrix.data)
-        each_neighbors = adj_matrix.nonzero()
-        
-        each_neighbors = {node: each_neighbors[1][each_neighbors[0] == node].tolist() for node in range(network.vcount())}
 
-        n_node = network.vcount()
-        node_status = [0] * n_node 
-        neighbour_status = [0] * n_node
-        new_infected = []
-        day_total_infected = [0] * 28
-
-        # Day 1
-        day = 1
-        sum_of_ifected = 0 
-        infected_per_day = []
-        for node in seed:
-            node_status[node] = 1
-        
-        new_infected.append(seed)
-
-        day_total_infected[day - 1] = sum(node_status)
+        nNode = network.vcount()
+        node_status = np.zeros(nNode, dtype=int) # start from a healthy population
+        adj_matrix = np.array(network.get_adjacency().data)
+        each_neighbors = {node: np.where(adj_matrix[node, :] > 0)[0] for node in range(nNode)} # get the neighbor list of each node
+        infected_a_day,infected_List = [] , []
         
 
-        for day in range(2, 29):
-            not_adopted = [node for node in range(n_node) if node_status[node] == 0]
-            adopted = [node for node in range(n_node) if node_status[node] == 1]
+        for seed in node_seed:
+            node_status[seed] = 1 # adopt (value=1), don't adopt (value=0)
+        sum_of_ifected = 0
+        for day in range(1,29):  #n_day + 1):
+            n_infected = 0
 
-            neighbour_status = {node : calculate_adopted_nei(node, node_status, each_neighbors) for node in range(n_node)}
-            infected = []
-            for node in adopted:
-                for neighbour in network.neighbors(node):
-                    if neighbour_status[neighbour] >= threshold[node]: 
-                        infected.append(neighbour)
+            for node in range(nNode):
+                if node_status[node] == 0:
+                    neighbours = each_neighbors[node]
+                    n_neighbors = len(neighbours)
+                    n_adopters = np.sum(node_status[neighbours] == 1)
+
+                    #if n_adopters/n_neighbors > threshold[node]:
+                    if n_adopters > threshold[node]:
+                        node_status[node] = 1
+                        n_infected += 1
             
-            new_infected.append(infected)
-            for node in new_infected[day - 1]:
-                node_status[node] = 1
-                
-            sum_of_ifected += len(adopted)
-            day_total_infected[day - 1] = sum(node_status)
-            infected_per_day.append(len(new_infected[day - 1]))
+            infected_at_all = np.sum(node_status == 1)
+            sum_of_ifected += np.sum(node_status == 1)
+            infected_a_day.append(n_infected)
+            infected_List.append(infected_at_all)
 
-    spread.append(day_total_infected[-1])
-    sum_spread.append(sum_of_ifected)
-    infected_a_day.append(infected_per_day)
-
-    return np.mean(spread), np.mean(sum_of_ifected), compute_mean_by_index(infected_a_day)
+        # Collect all of the necessary information
+        spread_per_simulation = np.sum(node_status == 1)
+        spread.append(spread_per_simulation)
+        sum_spread.append(sum_of_ifected)
+        infected_per_day.append(infected_a_day)
+        infected_per_iteration.append(infected_List)
+    return np.mean(spread), np.mean(sum_spread), compute_mean_by_index(infected_per_day), compute_mean_by_index(infected_per_iteration)
 
 def greedy_Th(g, k, threshold, mc=1000, timestamps = 28):
     """
@@ -317,7 +264,9 @@ def greedy_Th(g, k, threshold, mc=1000, timestamps = 28):
 
     Output: optimal seed set, resulting spread, time for each iteration
     """
-
+    # Threshold_list = [0] * 15 + [0.1] * 5 + [0.2] * 5 + [0.3] + [0.4] * 2 + [0.5] * 2 + [0.6, 0.7, 0.8] + [0.9] * 4 + [1] * 85
+    # # shuffle the list
+    # np.random.shuffle(Threshold_list)
     S, spread, timelapse, start_time = [], [], [], time.time()
     # setting list of nodes and making the node 107 the first node in odrer to compare with other methods
     l = [i for i in range(g.vcount())]
@@ -333,7 +282,7 @@ def greedy_Th(g, k, threshold, mc=1000, timestamps = 28):
         for j in set(l) - set(S):
 
             # Get the spread
-            s = th_model(S + [j], g, threshold, [], mc, Monte_Carlo = True)
+            s = threshold_model(g, S + [j],  threshold, 28, mc, Monte_Carlo = True)
 
             # Update the winning node and spread so far
             if s[1] > best_spread:

@@ -61,7 +61,7 @@ print(paste0('avg path length:', avg_path_length))
 candidates <- c()
 for (i in 1:nrow((highschool_edges))) {
   # remove an edge
-  graph2 <- delete.edges(Highschool, i)
+  graph2 <- delete_edges(Highschool, i)
   
   # Calculate the new average path length
   new_avg_path_length <- average.path.length(graph2)
@@ -75,7 +75,7 @@ for (i in 1:nrow((highschool_edges))) {
   }
 }
 
-graph <- delete.edges(Highschool, candidates)
+graph <- delete_edges(Highschool, candidates)
 average.path.length(graph)
 my_subset <- data.frame(
     from = highschool_edges$from[candidates],

@@ -27,10 +27,15 @@ ER1000 <- sample_gnp(1000, 0.2, directed = FALSE, loops= FALSE)
 ## Question 6
 
 ```{r}
+n=40
+ER1 <- sample_gnp(n, 0.05, directed = FALSE, loops = FALSE)
+ER2 <- sample_gnp(n, 0.1, directed = FALSE, loops = FALSE)
+ER3 <- sample_gnp(n, 0.2, directed = FALSE, loops = FALSE)
+ER1000 <- sample_gnp(1000, 0.2, directed = FALSE, loops= FALSE)
 #use only the largest component for analysis
-plot(ER1, layout = layout.circle(ER1), vertex.label = NA)
-plot(ER2, layout = layout.circle(ER2), vertex.label = NA)
-plot(ER3, layout = layout.circle(ER3), vertex.label = NA)
+#plot(ER1, layout = layout.circle(ER1), vertex.label = NA)
+#plot(ER2, layout = layout.circle(ER2), vertex.label = NA)
+#plot(ER3, layout = layout.circle(ER3), vertex.label = NA)
 #plot(ER1000)
 transitivity(ER1000)
 ```
