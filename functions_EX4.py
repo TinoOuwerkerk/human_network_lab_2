@@ -219,7 +219,7 @@ def threshold_model(network, node_seed, threshold, n_day, mc=100, Monte_Carlo=Fa
         node_status = np.zeros(nNode, dtype=int) # start from a healthy population
         adj_matrix = np.array(network.get_adjacency().data)
         each_neighbors = {node: np.where(adj_matrix[node, :] > 0)[0] for node in range(nNode)} # get the neighbor list of each node
-        infected_a_day,infected_List = [] , []
+        # infected_a_day,infected_List = [] , []
         
 
         for seed in node_seed:
@@ -238,19 +238,20 @@ def threshold_model(network, node_seed, threshold, n_day, mc=100, Monte_Carlo=Fa
                     if n_adopters > threshold[node]:
                         node_status[node] = 1
                         n_infected += 1
-            
-            infected_at_all = np.sum(node_status == 1)
+            if n_infected == 0:
+                break
+            # infected_at_all = np.sum(node_status == 1)
             sum_of_ifected += np.sum(node_status == 1)
-            infected_a_day.append(n_infected)
-            infected_List.append(infected_at_all)
+            # infected_a_day.append(n_infected)
+            # infected_List.append(infected_at_all)
 
         # Collect all of the necessary information
         spread_per_simulation = np.sum(node_status == 1)
         spread.append(spread_per_simulation)
         sum_spread.append(sum_of_ifected)
-        infected_per_day.append(infected_a_day)
-        infected_per_iteration.append(infected_List)
-    return np.mean(spread), np.mean(sum_spread), compute_mean_by_index(infected_per_day), compute_mean_by_index(infected_per_iteration)
+        # infected_per_day.append(infected_a_day)
+        # infected_per_iteration.append(infected_List)
+    return (np.mean(spread),np.mean(sum_spread))#, , compute_mean_by_index(infected_per_day), compute_mean_by_index(infected_per_iteration)
 
 def greedy_Th(g, k, threshold, mc=1000, timestamps = 28):
     """
@@ -269,17 +270,17 @@ def greedy_Th(g, k, threshold, mc=1000, timestamps = 28):
     # np.random.shuffle(Threshold_list)
     S, spread, timelapse, start_time = [], [], [], time.time()
     # setting list of nodes and making the node 107 the first node in odrer to compare with other methods
-    l = [i for i in range(g.vcount())]
-    l.remove(106)
-    l.insert(0, 106)
+    # l = [i for i in range(g.vcount())]
+    # l.remove(106)
+    # l.insert(0, 106)
     
     # Find k nodes with largest marginal gain
     for _ in range(k):
 
         # Loop over nodes that are not yet in seed set to find biggest marginal gain
         best_spread = 0
-        #for j in set(range(g.vcount())) - set(S):
-        for j in set(l) - set(S):
+        for j in set(range(g.vcount())) - set(S):
+        #for j in set(l) - set(S):
 
             # Get the spread
             s = threshold_model(g, S + [j],  threshold, 28, mc, Monte_Carlo = True)
@@ -316,11 +317,11 @@ def greedy_immunized_Th(g, k, threshold=0.1 ,mc=1000):
     for _ in range(k):
 
         # Loop over nodes that are not yet in seed set to find biggest marginal gain
-        best_spread = th_model([106], g, threshold, [], mc, Monte_Carlo = True)[1]
+        best_spread = threshold_model([106], g, threshold, [], mc, Monte_Carlo = True)[1]
         for j in set(range(g.vcount())) - set(immunaized_list):
 
             # Get the spread
-            s = th_model([106], g, threshold, immunaized_list + [j], mc, Monte_Carlo = True)
+            s = threshold_model([106], g, threshold, immunaized_list + [j], mc, Monte_Carlo = True)
 
             # Update the winning node and spread so far
             if s[1] < best_spread and s[1] !=0 :
