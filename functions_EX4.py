@@ -219,13 +219,13 @@ def threshold_model(network, node_seed, threshold, n_day, mc=100, Monte_Carlo=Fa
         node_status = np.zeros(nNode, dtype=int) # start from a healthy population
         adj_matrix = np.array(network.get_adjacency().data)
         each_neighbors = {node: np.where(adj_matrix[node, :] > 0)[0] for node in range(nNode)} # get the neighbor list of each node
-        # infected_a_day,infected_List = [] , []
+        infected_a_day,infected_List = [] , []
         
 
         for seed in node_seed:
             node_status[seed] = 1 # adopt (value=1), don't adopt (value=0)
         sum_of_ifected = 0
-        for day in range(1,29):  #n_day + 1):
+        for day in range(1, 29):  #n_day + 1):
             n_infected = 0
 
             for node in range(nNode):
@@ -238,20 +238,20 @@ def threshold_model(network, node_seed, threshold, n_day, mc=100, Monte_Carlo=Fa
                     if n_adopters > threshold[node]:
                         node_status[node] = 1
                         n_infected += 1
-            if n_infected == 0:
-                break
-            # infected_at_all = np.sum(node_status == 1)
+            # if n_infected == 0:
+            #     break
+            infected_at_all = np.sum(node_status == 1)
             sum_of_ifected += np.sum(node_status == 1)
-            # infected_a_day.append(n_infected)
-            # infected_List.append(infected_at_all)
+            infected_a_day.append(n_infected)
+            infected_List.append(infected_at_all)
 
         # Collect all of the necessary information
         spread_per_simulation = np.sum(node_status == 1)
         spread.append(spread_per_simulation)
         sum_spread.append(sum_of_ifected)
-        # infected_per_day.append(infected_a_day)
-        # infected_per_iteration.append(infected_List)
-    return (np.mean(spread),np.mean(sum_spread))#, , compute_mean_by_index(infected_per_day), compute_mean_by_index(infected_per_iteration)
+        infected_per_day.append(infected_a_day)
+        infected_per_iteration.append(infected_List)
+    return np.mean(spread), np.mean(sum_spread), compute_mean_by_index(infected_per_day), compute_mean_by_index(infected_per_iteration)
 
 def greedy_Th(g, k, threshold, mc=1000, timestamps = 28):
     """
@@ -336,4 +336,65 @@ def greedy_immunized_Th(g, k, threshold=0.1 ,mc=1000):
         timelapse.append(time.time() - start_time)
 
     return(immunaized_list, spread, timelapse)
+
+
+def celf(g,k,threshold,mc):  
+    """
+    Input:  graph object, number of seed nodes
+    Output: optimal seed set, resulting spread, time for each iteration
+    """
+     
+    # --------------------
+    # Find the first node with greedy algorithm
+    # --------------------
+    
+    # Calculate the first iteration sorted list
+    start_time = time.time() 
+    marg_gain = [threshold_model(g,[node], threshold, mc)[0] for node in range(g.vcount())]
+
+    # Create the sorted list of nodes and their marginal gain 
+    Q = sorted(zip(range(g.vcount()), marg_gain), key=lambda x: x[1],reverse=True)
+
+    # Select the first node and remove from candidate list
+    S, spread, SPREAD = [Q[0][0]], Q[0][1], [Q[0][1]]
+    Q, timelapse = Q[1:], [time.time()-start_time]
+    #  LOOKUPS  = [g.vcount()]
+    
+    # --------------------
+    # Find the next k-1 nodes using the list-sorting procedure
+    # --------------------
+    
+    for _ in range(k-1):    
+
+        check, node_lookup = False, 0
+        
+        while not check:
+            
+            # Count the number of times the spread is computed
+            node_lookup += 1
+            
+            # Recalculate spread of top node
+            current = Q[0][0]
+            
+            # Evaluate the spread function and store the marginal gain in the list
+            Q[0] = (current, threshold_model(g, S + [current], threshold, mc)[0] - spread)
+            # print(Q)
+            # Re-sort the list
+            Q = sorted(Q, key = lambda x: x[1], reverse = True)
+
+            # Check if previous top node stayed on top after the sort
+            check = (Q[0][0] == current)
+
+        # Select the next node
+        spread += Q[0][1]
+        S.append(Q[0][0])
+        SPREAD.append(spread)
+        # LOOKUPS.append(node_lookup)
+        timelapse.append(time.time() - start_time)
+
+        # Remove the selected node from the list
+        Q = Q[1:]
+
+    return(S,SPREAD,timelapse) #,LOOKUPS)
+
 

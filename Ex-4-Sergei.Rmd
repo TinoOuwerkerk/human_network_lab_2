@@ -243,7 +243,7 @@ ggplot() + geom_smooth(aes(len, tel1, colour='No Immunity'), se =F) +
   labs(x = "Days", y = "Average Number of infected nodes", title = paste("Average Number of infected nodes in Barabasi model")
         )+
   theme_minimal()
-}c
+}
 
 ```
 
