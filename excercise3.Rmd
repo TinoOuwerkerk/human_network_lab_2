@@ -339,7 +339,7 @@ ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Threshold
 ```{r}
 x <- highschool_att$Threshold
 # create a sample dataset
-my_list <- c(rep(0, 15), rep(0.1, 5), rep(0.2, 5), 0.3, rep(0.4, 2), rep(0.5, 2), 0.6, 0.7, 0.8, rep(0.9, 4), rep(1, 85))
+  my_list <- c(rep(0, 51), rep(0.1, 18), rep(0.2, 4), rep(0.3, 4), rep(0.4, 8), rep(0.5, 8), rep(0.6, 4), rep(0.7, 4), rep(0.8, 4), rep(0.9, 0), rep(1, 17))
 
 # plot the empirical distribution
 plot(my_list, main="Empirical Distribution")
@@ -366,8 +366,16 @@ sum <- replicate(n, threshold_model(Highschool, list('59', '63', '91', '92', '99
 mean(sum)
 ```
 
-## Question 16
+## Different students q15
 
 ```{r}
+ThModel(list('37', '4', '96', '24', '70', '77', '17'), Highschool, highschool_att$Emp)
+```
 
+```{r}
+ThModel(list('68', '88', '17', '82', '90', '94', '56'), Highschool, highschool_att$Emp)
+```
+
+```{r}
+ThModel(list('54', '20', '110', '64', '96', '28', '37'), Highschool, highschool_att$Emp)
 ```
