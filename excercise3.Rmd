@@ -50,6 +50,20 @@ print('average path length:')
 average.path.length(Highschool)
 ```
 
+```{r}
+# Calculate edge betweenness centrality
+edge_betweenness <- edge_betweenness(Highschool)
+
+# Sort the edge_betweenness vector in descending order
+sorted_edges <- sort(edge_betweenness, decreasing = TRUE)
+
+# Select the top 5 edges with the highest betweenness centrality
+top5_edges <- sorted_edges[1:5]
+
+# Delete the top 5 edges from the Highschool object
+sub_graph <- delete_edges(Highschool, E(Highschool)[edge_betweenness %in% top5_edges])
+average.path.length(sub_graph)
+```
 ## Question 10
 
 ```{r}
@@ -58,7 +72,7 @@ avg_path_length <- average.path.length(Highschool)
 print(paste0('avg path length:', avg_path_length))
 for (i in 1:nrow(highschool_edges)) {
   # remove an edge
-  graph2 <- delete.edges(Highschool, i)
+  graph2 <- delete_edges(Highschool, i)
   
   # Calculate the new average path length
   new_avg_path_length <- average.path.length(graph2)
@@ -71,11 +85,12 @@ for (i in 1:nrow(highschool_edges)) {
   print(paste0('new_avg_path_length:', new_avg_path_length))
   }
 }
+
 ```
 
 ## Question 11
 
-```{r}
+```{r, message=FALSE}
 stopifnot(require(data.table))
 stopifnot(require(Matrix))
 calculate_value <- function(node, each_neighbors,Pprob){
@@ -206,115 +221,45 @@ infected(Highschool3, Highschool2, Highschool, 0.9)
 ```
 
 ```{r}
-# SIR <- function(network, node_seed = "5", Pprob = 0.15) {
-#   revocered_list = list()
-#   # prepare input for the 'calculate_value' function
-#   adj_matrix <- igraph::as_adjacency_matrix(network, type = 'both')
-#   each_neighbors <- which(adj_matrix > 0, arr.ind = TRUE)
-#   each_neighbors <- split(each_neighbors[, 2], each_neighbors[, 1]) # get the neighbour list of each node
-# 
-#   nNode <- vcount(network)
-#   node_status <- rep.int(0, nNode) # start from a healthy population
-#   node_status_r <- rep.int(0, nNode) # start from a healthy population
-#   day_infected <- vector() # Total number of infected population
-#   day_recovered <- vector() # Total number of recovered population
-#   new_infected <- list() # Record the ID of person getting infected at each time step
-#   
-#   day <- 1
-#   node_status[as.numeric(node_seed)] <- 1 # recovered(value=2) infected(value=1) susceptible(value=0)
-#   day_infected[day] <- sum(node_status)
-#   new_infected[[day]] <- node_seed # The ID of the person infected in Day 1 (Patient Zero)
-#   # simulate the spread of virus within 4 weeks
-#   for (day in c(2:28)){
-#     
-#     ContagiousID<-which(node_status == 1 & node_status != 2)
-#     
-#     # Infect nodes that are connected to infectious nodes
-#     infectedID <- unlist(lapply(ContagiousID, calculate_value, each_neighbors, Pprob))
-#     newinfectedID <- setdiff(infectedID, which(node_status == 1))
-# 
-#     # Update node status and other variables
-#     node_status[newinfectedID] <- 1
-#     day_infected[day] <- sum(node_status == 1)
-#     day_recovered[day] <- sum(node_status == 2)
-#     new_infected[[paste("Day",day)]] <- newinfectedID
-#     
-#   }
-#   return(day_infected) # return the number of newly infected people by day
-# }
-# 
-# results <- SIR(Highschool)
-# results
-```
+SIR <- function(network, node_seed = "5", Pprob = 0.15) {
+  revocered_list = list()
+  # prepare input for the 'calculate_value' function
+  adj_matrix <- igraph::as_adjacency_matrix(network, type = 'both')
+  each_neighbors <- which(adj_matrix > 0, arr.ind = TRUE)
+  each_neighbors <- split(each_neighbors[, 2], each_neighbors[, 1]) # get the neighbour list of each node
 
-## SIR
+  nNode <- vcount(network)
+  node_status <- rep.int(0, nNode) # start from a healthy population
+  node_status_r <- rep.int(0, nNode) # start from a healthy population
+  day_infected <- vector() # Total number of infected population
+  day_recovered <- vector() # Total number of recovered population
+  new_infected <- list() # Record the ID of person getting infected at each time step
+  
+  day <- 1
+  node_status[as.numeric(node_seed)] <- 1 # recovered(value=2) infected(value=1) susceptible(value=0)
+  day_infected[day] <- sum(node_status)
+  new_infected[[day]] <- node_seed # The ID of the person infected in Day 1 (Patient Zero)
+  # simulate the spread of virus within 4 weeks
+  for (day in c(2:28)){
+    
+    ContagiousID<-which(node_status == 1 & node_status != 2)
+    
+    # Infect nodes that are connected to infectious nodes
+    infectedID <- unlist(lapply(ContagiousID, calculate_value, each_neighbors, Pprob))
+    newinfectedID <- setdiff(infectedID, which(node_status == 1))
 
-```{r}
-library(ggplot2)
-library(reshape2)
-
-source("networked-sir.R")
-# Population size
-N <- vcount(Highschool)
-
-repeat {
-  # Degree sequence drawn from geometric distribution
-  # where all vertices have at least one edge
-  dseq <- rgeom(n= N, prob = 0.2) + 1
-  if(is_graphical(dseq)) {
-    break
+    # Update node status and other variables
+    node_status[newinfectedID] <- 1
+    day_infected[day] <- sum(node_status == 1)
+    day_recovered[day] <- sum(node_status == 2)
+    new_infected[[paste("Day",day)]] <- newinfectedID
+    
   }
+  return(day_infected) # return the number of newly infected people by day
 }
 
-# Parameters
-X0 <- rep.int(0, N)
-seed <- 5 # patient zero
-beta <- 0.15 # infection rate
-gamma <- 1
-tmax <- 28
-X0[seed]<-1
-sim <- networked_sir(X0 = X0, G = Highschool, beta = beta, gamma = gamma, tmax = tmax)
-sim
-```
-
-```{r}
-sir_inf <- function(network1, network2, network3, X0, beta, gamma, tmax){
-  tel1 = 0
-  tel2 = 0
-  tel3 = 0
-  for (i in 0:99){
-    tel1 = tel1 + (networked_sir(X0 = X0, G = network1, beta = beta, gamma = gamma, tmax = tmax))
-    tel2 = tel2 + (networked_sir(X0 = X0, G = network2, beta = beta, gamma = gamma, tmax = tmax))
-    tel3 = tel3 + (networked_sir(X0 = X0, G = network3, beta = beta, gamma = gamma, tmax = tmax))
-  }
-  tel1 = as.integer(tel1/100)
-  tel2 = as.integer(tel2/100)
-  tel3 = as.integer(tel3/100)
-  
-  len <- 1:length(tel1)-1
-  print(tel1)
-  print(tel2)
-  print(tel3)
-  
-  ggplot() + geom_smooth(aes(len, tel1, color='red')) +
-    geom_smooth(aes(len, tel2, color='green')) +
-    geom_smooth(aes(len, tel3, color='blue')) +
-         scale_color_discrete(labels=c('Highschool', 'Highschool2', 'Highschool3')) +
-    xlab('day') + ylab('newly infected')
-
-}
-```
-
-```{r}
-sir_inf(Highschool, Highschool2, Highschool3, X0, 0.15, gamma, tmax)
-```
-
-```{r}
-sir_inf(Highschool, Highschool2, Highschool3, X0, 0.1, gamma, tmax)
-```
-
-```{r}
-sir_inf(Highschool, Highschool2, Highschool3, X0, 0.9, gamma, tmax)
+results <- SIR(Highschool)
+results
 ```
 
 ## Question 14
@@ -409,7 +354,7 @@ ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Threshold
 ```{r}
 x <- highschool_att$Threshold
 # create a sample dataset
-  my_list <- c(rep(0, 51), rep(0.1, 18), rep(0.2, 4), rep(0.3, 4), rep(0.4, 8), rep(0.5, 8), rep(0.6, 4), rep(0.7, 4), rep(0.8, 4), rep(0.9, 0), rep(1, 17))
+my_list <- c(rep(0, 15), rep(0.1, 5), rep(0.2, 5), 0.3, rep(0.4, 2), rep(0.5, 2), 0.6, 0.7, 0.8, rep(0.9, 4), rep(1, 85))
 
 # plot the empirical distribution
 plot(my_list, main="Empirical Distribution")
@@ -417,35 +362,24 @@ plot(my_list, main="Empirical Distribution")
 plot(sort(x), main="Original Threshold Distribution")
 ```
 
-sample(my_list)
-
 ```{r}
 highschool_att$Emp <- sample(my_list)
 threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Emp, 28)
 
-ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Emp)
+#ThModel(list('59', '63', '91', '92', '99'), Highschool, highschool_att$Emp)
 ```
 
 ```{r}
 # Run the simulation n times and store the results in a vector
 n <- 1000
-
-sum <- replicate(n, threshold_model(Highschool, list('59', '63', '91', '92', '99'), sample(my_list), 28))
+sum <- replicate(n, threshold_model(Highschool, list('59', '63', '91', '92', '99'), highschool_att$Emp, 28))
 
 # Calculate the mean of the results
 mean(sum)
 ```
 
-## Different students q15
+## Question 16
 
 ```{r}
-ThModel(list('37', '4', '96', '24', '70', '77', '17'), Highschool, highschool_att$Emp)
-```
 
-```{r}
-ThModel(list('68', '88', '17', '82', '90', '94', '56'), Highschool, highschool_att$Emp)
-```
-
-```{r}
-ThModel(list('54', '20', '110', '64', '96', '28', '37'), Highschool, highschool_att$Emp)
 ```
